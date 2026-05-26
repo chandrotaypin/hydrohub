@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id            Int          @id @default(autoincrement())
+  customerName  String
+  email         String
+  contactNumber String?
+  weight        Float
+  serviceType   String
+  weightType    Boolean
+  totalPrice    Float
+  paymentStatus PaymentStatus @default(UNPAID)
+  status        Status       @default(PENDING)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  transaction   Transaction?
+}
+
+enum OrderType {
+  LAUNDRY
+  WATER
+}
+
+model Transaction {
+  id            Int           @id @default(autoincrement())
+  orderId       Int?          @unique
+  waterOrderId  Int?          @unique
+  orderType     OrderType
+  amount        Float
+  paymentStatus PaymentStatus @default(PAID)
+  claimedAt     DateTime      @default(now())
+  customerID    String
+  paymentMethod PaymentMethod @default(CASH)
+  order         Order?        @relation(fields: [orderId], references: [id])
+  waterOrder    WaterOrder?   @relation(fields: [waterOrderId], references: [id])
+}
+
+
+
+model WaterOrder {
+  id            Int           @id @default(autoincrement())
+  customerName  String
+  email         String?
+  serviceType   WaterService  @default(REFILL)
+  quantity      Int
+  totalPrice    Float
+  paymentStatus PaymentStatus @default(UNPAID)
+  status        Status        @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  transaction   Transaction? 
+}
+
+enum WaterService {
+  NEW_CONTAINER
+  REFILL
+}
+
+enum Status {
+  PENDING
+  WASHING
+  READY
+  CLAIMED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum PaymentMethod {
+  CASH
+  GCASH
+}

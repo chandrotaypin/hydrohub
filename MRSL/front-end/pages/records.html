@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laundry Records · Hydro Hub</title>
+  <link rel="stylesheet" href="../css/records.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- =============================================
+       MOBILE FRAME
+  ============================================= -->
+  <div class="mobile-frame">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-top">
+        <a href="../pages/dashboard.html" class="back-btn" aria-label="Go back">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <div class="header-brand">
+          <span class="brand-dot laundry-dot"></span>
+          <span class="brand-name">Hydro Hub</span>
+        </div>
+        <button class="refresh-btn" id="refreshBtn" aria-label="Refresh records">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="header-body">
+        <div class="header-icon-wrap laundry-icon">
+          <svg viewBox="0 0 64 64" fill="none" width="36" height="36">
+            <rect x="10" y="14" width="44" height="38" rx="6" stroke="white" stroke-width="2.5" fill="none"/>
+            <circle cx="32" cy="34" r="10" stroke="white" stroke-width="2.5" fill="none"/>
+            <circle cx="32" cy="34" r="4" fill="white" opacity="0.45"/>
+            <rect x="13" y="17" width="7" height="3.5" rx="1.75" fill="white"/>
+            <rect x="22" y="17" width="3.5" height="3.5" rx="1.75" fill="white"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="page-title">Transaction Records</h1>
+          <p class="page-sub">Laundry · Claimed Orders</p>
+        </div>
+      </div>
+
+      <!-- Summary chips -->
+      <div class="summary-row" id="summaryRow">
+        <div class="chip">
+          <span class="chip-label">Total Orders</span>
+          <span class="chip-val" id="mob-totalCount">—</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label">Revenue</span>
+          <span class="chip-val" id="mob-totalRevenue">—</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label">Total Weight</span>
+          <span class="chip-val" id="mob-totalWeight">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-bar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" width="15" height="15">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input class="search-input" id="mob-searchInput" type="text" placeholder="Search customer or order ID…" />
+        <button class="search-clear" id="mob-searchClear" aria-label="Clear search" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="filter-row">
+        <button class="filter-pill active" data-filter="all">All</button>
+        <button class="filter-pill" data-filter="wash">Wash</button>
+        <button class="filter-pill" data-filter="wash_dry_fold">Wash · Dry · Fold</button>
+        <button class="filter-pill" data-filter="bulk">Bulk</button>
+      </div>
+      <div class="sort-row">
+        <span class="sort-label">Sort:</span>
+        <select class="sort-select" id="mob-sortSelect">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name_az">Name A→Z</option>
+          <option value="name_za">Name Z→A</option>
+          <option value="price_high">Price ↓</option>
+          <option value="price_low">Price ↑</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Records Content -->
+    <div class="records-content">
+      <div class="skeleton-wrap" id="mob-skeletonWrap">
+        <div class="skeleton-card" style="--d:0ms"></div>
+        <div class="skeleton-card" style="--d:80ms"></div>
+        <div class="skeleton-card" style="--d:160ms"></div>
+        <div class="skeleton-card" style="--d:240ms"></div>
+        <div class="skeleton-card" style="--d:320ms"></div>
+      </div>
+      <div class="empty-state" id="mob-emptyState" style="display:none;">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none" width="52" height="52">
+            <circle cx="32" cy="32" r="28" fill="rgba(91,141,238,0.08)"/>
+            <rect x="18" y="16" width="28" height="34" rx="4" stroke="#5b8dee" stroke-width="2" fill="none" opacity="0.5"/>
+            <line x1="24" y1="26" x2="40" y2="26" stroke="#5b8dee" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+            <line x1="24" y1="32" x2="36" y2="32" stroke="#5b8dee" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+            <line x1="24" y1="38" x2="33" y2="38" stroke="#5b8dee" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+          </svg>
+        </div>
+        <p class="empty-title">No Records Found</p>
+        <p class="empty-sub">No claimed laundry orders yet.</p>
+      </div>
+      <div class="error-state" id="mob-errorState" style="display:none;">
+        <div class="error-icon">
+          <svg viewBox="0 0 64 64" fill="none" width="48" height="48">
+            <circle cx="32" cy="32" r="28" fill="rgba(239,68,68,0.08)"/>
+            <path d="M32 20v16M32 42v2" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="32" cy="32" r="26" stroke="#ef4444" stroke-width="2" opacity="0.4" fill="none"/>
+          </svg>
+        </div>
+        <p class="error-title">Connection Error</p>
+        <p class="error-sub" id="mob-errorMsg">Could not load records.</p>
+        <button class="retry-btn" id="mob-retryBtn">Try Again</button>
+      </div>
+      <div class="records-list" id="mob-recordsList"></div>
+      <div class="results-footer" id="mob-resultsFooter" style="display:none;">
+        <span id="mob-resultsCount"></span>
+      </div>
+    </div>
+  </div>
+  <!-- end mobile-frame -->
+
+
+  <!-- =============================================
+       DESKTOP LAYOUT
+  ============================================= -->
+  <div class="desktop-layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-drop"></div>
+        <span>HydroHub</span>
+      </div>
+      <div class="sidebar-user">
+        <div class="avatar" data-avatar></div>
+        <div>
+          <p class="s-welcome">Welcome back</p>
+          <p class="s-name" data-username></p>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <p class="nav-group-label">Services</p>
+        <button class="nav-item active" onclick="location.href='dashboard.html?tab=laundry'">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="5" y="7" width="3" height="1.5" rx=".75" fill="currentColor"/>
+          </svg>
+          Laundry
+        </button>
+        <button class="nav-item" onclick="location.href='dashboard.html?tab=water'">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path d="M9 3h6v3.5C17.5 8 20 11 20 14a8 8 0 0 1-16 0c0-3 2.5-6 5-7.5V3z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          </svg>
+          Water Refill
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="nav-item settings-btn" data-logout>
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <polyline points="16 17 21 12 16 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Log Out
+        </button>
+      </div>
+    </aside>
+
+    <main class="desktop-main">
+      <header class="desktop-header">
+        <div>
+          <p class="dh-label">LAUNDRY</p>
+          <h2 class="dh-title">Transaction Records</h2>
+          <p class="dh-sub">Claimed Orders</p>
+        </div>
+        <div class="header-actions">
+          <div class="summary-chip-group">
+            <div class="desk-chip">
+              <span class="desk-chip-label">Total Orders</span>
+              <span class="desk-chip-val" id="desk-totalCount">—</span>
+            </div>
+            <div class="desk-chip">
+              <span class="desk-chip-label">Revenue</span>
+              <span class="desk-chip-val" id="desk-totalRevenue">—</span>
+            </div>
+            <div class="desk-chip">
+              <span class="desk-chip-label">Total Weight</span>
+              <span class="desk-chip-val" id="desk-totalWeight">—</span>
+            </div>
+          </div>
+          <button class="desk-refresh-btn" id="desk-refreshBtn" aria-label="Refresh">
+            <svg viewBox="0 0 24 24" fill="none" width="17" height="17">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      <!-- Desktop Controls -->
+      <div class="desk-controls">
+        <div class="desk-search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input class="desk-search-input" id="desk-searchInput" type="text" placeholder="Search customer name or order ID…" />
+          <button class="search-clear" id="desk-searchClear" aria-label="Clear" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="desk-filter-row">
+          <button class="filter-pill active" data-filter="all">All</button>
+          <button class="filter-pill" data-filter="wash">Wash</button>
+          <button class="filter-pill" data-filter="wash_dry_fold">Wash · Dry · Fold</button>
+          <button class="filter-pill" data-filter="bulk">Bulk</button>
+        </div>
+        <div class="desk-sort-wrap">
+          <span class="sort-label">Sort:</span>
+          <select class="sort-select" id="desk-sortSelect">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="name_az">Name A→Z</option>
+            <option value="name_za">Name Z→A</option>
+            <option value="price_high">Price ↓</option>
+            <option value="price_low">Price ↑</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="desk-orders-container">
+        <!-- Skeleton -->
+        <div class="desk-skeleton-wrap" id="desk-skeletonWrap">
+          <div class="desk-skeleton-row" style="--d:0ms"></div>
+          <div class="desk-skeleton-row" style="--d:60ms"></div>
+          <div class="desk-skeleton-row" style="--d:120ms"></div>
+          <div class="desk-skeleton-row" style="--d:180ms"></div>
+          <div class="desk-skeleton-row" style="--d:240ms"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="desk-empty" id="desk-emptyState" style="display:none;">
+          <svg viewBox="0 0 64 64" fill="none" width="48" height="48">
+            <circle cx="32" cy="32" r="28" fill="rgba(91,141,238,0.08)"/>
+            <rect x="18" y="16" width="28" height="34" rx="4" stroke="#5b8dee" stroke-width="2" fill="none" opacity="0.5"/>
+            <line x1="24" y1="26" x2="40" y2="26" stroke="#5b8dee" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+            <line x1="24" y1="32" x2="36" y2="32" stroke="#5b8dee" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+          </svg>
+          <p class="desk-empty-title">No Records Found</p>
+          <p class="desk-empty-sub">No claimed laundry orders match your filters.</p>
+        </div>
+
+        <!-- Error state -->
+        <div class="desk-error" id="desk-errorState" style="display:none;">
+          <svg viewBox="0 0 64 64" fill="none" width="48" height="48">
+            <circle cx="32" cy="32" r="28" fill="rgba(239,68,68,0.08)"/>
+            <path d="M32 20v16M32 42v2" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="32" cy="32" r="26" stroke="#ef4444" stroke-width="2" opacity="0.4" fill="none"/>
+          </svg>
+          <p class="desk-empty-title">Connection Error</p>
+          <p class="desk-empty-sub" id="desk-errorMsg">Could not load records.</p>
+          <button class="retry-btn" id="desk-retryBtn">Try Again</button>
+        </div>
+
+        <table class="orders-table" id="desk-table">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Weight</th>
+              <th>Time In</th>
+              <th>Time Out</th>
+              <th>Price</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+          <tbody id="desk-tbody">
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+
+        <div class="desk-results-footer" id="desk-resultsFooter" style="display:none;">
+          <span id="desk-resultsCount"></span>
+        </div>
+      </div>
+    </main>
+  </div>
+  <!-- end desktop-layout -->
+
+
+  <!-- =============================================
+       DETAIL DRAWER (mobile)
+  ============================================= -->
+  <div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer" id="detailDrawer">
+      <div class="drawer-handle"></div>
+      <div class="drawer-header">
+        <div class="drawer-icon laundry-icon-sm">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <rect x="3" y="4" width="18" height="17" rx="3" stroke="white" stroke-width="1.8"/>
+            <circle cx="12" cy="13" r="4" stroke="white" stroke-width="1.8"/>
+            <circle cx="12" cy="13" r="1.5" fill="white" opacity="0.5"/>
+            <rect x="5" y="7" width="3" height="1.5" rx=".75" fill="white"/>
+          </svg>
+        </div>
+        <div>
+          <p class="drawer-eyebrow">Laundry Order</p>
+          <h2 class="drawer-title" id="drawerTitle">Order Detail</h2>
+        </div>
+        <button class="drawer-close" id="drawerClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-body" id="drawerBody">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal (desktop) -->
+  <div class="modal-overlay" id="detailModal" aria-hidden="true">
+    <div class="modal-box detail-modal-box" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-detail-header">
+        <div class="drawer-icon laundry-icon-sm">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <rect x="3" y="4" width="18" height="17" rx="3" stroke="white" stroke-width="1.8"/>
+            <circle cx="12" cy="13" r="4" stroke="white" stroke-width="1.8"/>
+            <circle cx="12" cy="13" r="1.5" fill="white" opacity="0.5"/>
+            <rect x="5" y="7" width="3" height="1.5" rx=".75" fill="white"/>
+          </svg>
+        </div>
+        <div>
+          <p class="drawer-eyebrow">Laundry Order</p>
+          <h2 class="drawer-title" id="modalTitle">Order Detail</h2>
+        </div>
+      </div>
+      <div class="modal-detail-body" id="modalBody">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script>
+    // Ensure username is displayed consistently across all pages
+    (function () {
+      const key = Object.keys(localStorage).find(k =>
+        k.toLowerCase().includes('user') || k.toLowerCase().includes('auth')
+      );
+      const raw = key ? localStorage.getItem(key) : null;
+      let name = '';
+      try { name = raw ? (JSON.parse(raw).username || JSON.parse(raw).name || raw) : ''; }
+      catch { name = raw || ''; }
+
+      if (!name) {
+        // Try common keys directly
+        name = localStorage.getItem('username') ||
+               localStorage.getItem('userName') ||
+               localStorage.getItem('userAdmin') ||
+               localStorage.getItem('adminName') || '';
+      }
+
+      if (name) {
+        document.querySelectorAll('[data-username]').forEach(el => el.textContent = name);
+        document.querySelectorAll('[data-avatar]').forEach(el => el.textContent = name.charAt(0).toUpperCase());
+      }
+    })();
+  </script>
+  <script src="../js/record.js" defer></script>
+</body>
+</html>

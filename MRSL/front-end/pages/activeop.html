@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Active Operations — Hydro Hub</title>
+  <link rel="stylesheet" href="../css/activeop.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- =============================================
+       MOBILE FRAME
+  ============================================= -->
+  <div class="mobile-frame">
+
+    <div class="mob-header">
+      <button class="back-btn" aria-label="Go back" onclick="location.href='dashboard.html?tab=laundry'">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M15 19l-7-7 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h1 class="page-title">Active Operations</h1>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab active" data-tab="pending">Pending</button>
+      <button class="tab" data-tab="washing">Washing</button>
+    </div>
+
+    <!-- PENDING -->
+    <div class="tab-panel" id="mob-panel-pending">
+      <div class="orders-list" id="mob-list-pending">
+        <p class="empty-state">Loading…</p>
+      </div>
+    </div>
+
+    <!-- WASHING -->
+    <div class="tab-panel hidden" id="mob-panel-washing">
+      <div class="orders-list" id="mob-list-washing">
+        <p class="empty-state">Loading…</p>
+      </div>
+    </div>
+
+  </div>
+  <!-- end mobile-frame -->
+
+
+  <!-- =============================================
+       DESKTOP LAYOUT
+  ============================================= -->
+  <div class="desktop-layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-drop"></div>
+        <span>HydroHub</span>
+      </div>
+      <div class="sidebar-user">
+        <div class="avatar" data-avatar></div>
+        <div>
+          <p class="s-welcome">Welcome back</p>
+          <p class="s-name" data-username></p>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <p class="nav-group-label">Services</p>
+        <button class="nav-item active" onclick="location.href='dashboard.html?tab=laundry'">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="5" y="7" width="3" height="1.5" rx=".75" fill="currentColor"/>
+          </svg>
+          Laundry
+        </button>
+        <button class="nav-item" onclick="location.href='dashboard.html?tab=water'">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path d="M9 3h6v3.5C17.5 8 20 11 20 14a8 8 0 0 1-16 0c0-3 2.5-6 5-7.5V3z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          </svg>
+          Water Refill
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="nav-item settings-btn" data-logout>
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <polyline points="16 17 21 12 16 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Log Out
+        </button>
+      </div>
+    </aside>
+
+    <main class="desktop-main">
+      <header class="desktop-header">
+        <div>
+          <p class="dh-label">LAUNDRY</p>
+          <h2 class="dh-title">Active Operations</h2>
+        </div>
+        <div class="header-actions">
+          <div class="order-count-chip" id="chip-pending">
+            <span class="chip-dot blue"></span>
+            — Pending
+          </div>
+          <div class="order-count-chip" id="chip-washing">
+            <span class="chip-dot green"></span>
+            — Washing
+          </div>
+        </div>
+      </header>
+
+      <div class="desk-tab-bar">
+        <button class="desk-tab active" data-desktab="pending">Pending</button>
+        <button class="desk-tab" data-desktab="washing">Washing</button>
+      </div>
+
+      <!-- PENDING TABLE -->
+      <div class="desk-panel" id="desk-panel-pending">
+        <div class="desk-orders-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order #</th><th>Customer</th><th>Service</th>
+                <th>Time In</th><th>Price</th>
+                <th>Payment</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="desk-tbody-pending">
+              <tr><td colspan="7" class="empty-state">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- WASHING TABLE -->
+      <div class="desk-panel hidden" id="desk-panel-washing">
+        <div class="desk-orders-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order #</th><th>Customer</th><th>Service</th>
+                <th>Time In</th><th>Price</th>
+                <th>Payment</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="desk-tbody-washing">
+              <tr><td colspan="7" class="empty-state">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <!-- end desktop-layout -->
+
+
+  <!-- =============================================
+       CONFIRM MODAL
+  ============================================= -->
+  <div class="modal-overlay" id="confirmModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <p class="modal-heading">
+        Move order <span id="modal-order-num">#—</span><br>to <span id="modal-next-status">next status</span>?
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn undo" id="modalUndo">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+            <path d="M3 10h10a7 7 0 1 1 0 14H3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 6L3 10l4 4" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Cancel
+        </button>
+        <button class="modal-btn confirm" id="modalConfirm">
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+            <path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- auth.js MUST come first -->
+  <script src="../js/auth.js"></script>
+  <script src="../js/activeop.js" defer></script>
+
+</body>
+</html>

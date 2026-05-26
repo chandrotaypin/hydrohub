@@ -1,0 +1,326 @@
+/* ── RESET & ROOT ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #1a2d6d;
+  --ocean:       #2148c0;
+  --sky:         #5b9bd5;
+  --mist:        #d6eaf8;
+  --foam:        #eef6fd;
+  --white:       #ffffff;
+  --text-dark:   #1a2d6d;
+  --text-mid:    #4a6080;
+  --text-light:  #8fafc8;
+  --shadow-soft: 0 8px 32px rgba(26,45,109,.12);
+  --shadow-card: 0 20px 60px rgba(26,45,109,.18);
+  --radius:      18px;
+  --transition:  .25s cubic-bezier(.4,0,.2,1);
+}
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--foam);
+  color: var(--text-dark);
+}
+
+/* ── LAYOUT ── */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 48px 0 64px;
+}
+
+/* ── WATER BACKGROUND LAYERS ── */
+.bg-deep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, var(--navy) 0%, var(--ocean) 55%, var(--sky) 100%);
+  z-index: 0;
+}
+
+/* ── ANIMATED BUBBLES ── */
+.bubbles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bubble {
+  position: absolute;
+  bottom: -80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.10);
+  animation: rise linear infinite;
+}
+.bubble:nth-child(1)  { width:14px; height:14px; left:8%;   animation-duration:9s;  animation-delay:0s;   }
+.bubble:nth-child(2)  { width:22px; height:22px; left:17%;  animation-duration:13s; animation-delay:2s;   }
+.bubble:nth-child(3)  { width:10px; height:10px; left:28%;  animation-duration:8s;  animation-delay:4s;   }
+.bubble:nth-child(4)  { width:18px; height:18px; left:42%;  animation-duration:11s; animation-delay:1s;   }
+.bubble:nth-child(5)  { width:28px; height:28px; left:55%;  animation-duration:15s; animation-delay:3s;   }
+.bubble:nth-child(6)  { width:12px; height:12px; left:67%;  animation-duration:10s; animation-delay:6s;   }
+.bubble:nth-child(7)  { width:20px; height:20px; left:78%;  animation-duration:12s; animation-delay:1.5s; }
+.bubble:nth-child(8)  { width:8px;  height:8px;  left:89%;  animation-duration:7s;  animation-delay:5s;   }
+
+@keyframes rise {
+  0%   { transform: translateY(0) scale(1);       opacity: .12; }
+  80%  { opacity: .10; }
+  100% { transform: translateY(-110vh) scale(1.3); opacity: 0;   }
+}
+
+/* ── HEADER ── */
+.header {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: 56px 32px 40px;
+  text-align: center;
+  animation: fadeDown .7s ease both;
+}
+
+.logo-ring {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  border: 2px solid rgba(255,255,255,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 8px rgba(255,255,255,.06);
+}
+.logo-ring svg { width: 32px; height: 32px; }
+
+.brand {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: clamp(28px, 6vw, 36px);
+  letter-spacing: -.5px;
+  color: var(--white);
+  line-height: 1;
+}
+.brand-sub {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.55);
+  margin-top: 6px;
+}
+
+/* ── LOGIN CARD ── */
+.card-wrap {
+  position: relative;
+  z-index: 10;
+  width: calc(100% - 48px);
+  max-width: 400px;
+  padding: 32px 32px 40px;
+  margin-top: 24px;
+  background: var(--foam);
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(26,45,109,.30);
+  animation: fadeUp .7s .2s ease both;
+}
+
+.welcome {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--ocean);
+  text-align: center;
+  margin-bottom: 32px;
+  letter-spacing: .2px;
+}
+
+/* ── FORM ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-wrap .icon {
+  position: absolute;
+  left: 16px;
+  color: var(--text-light);
+  transition: color var(--transition);
+  pointer-events: none;
+}
+.input-wrap input {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  border: 1.5px solid rgba(91,155,213,.25);
+  border-radius: var(--radius);
+  background: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text-dark);
+  outline: none;
+  box-shadow: var(--shadow-soft);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.input-wrap input::placeholder { color: var(--text-light); }
+.input-wrap input:focus {
+  border-color: var(--ocean);
+  box-shadow: 0 0 0 4px rgba(33,72,192,.10), var(--shadow-soft);
+}
+.input-wrap:focus-within .icon { color: var(--ocean); }
+
+/* ── PASSWORD TOGGLE ── */
+.toggle-pwd {
+  position: absolute;
+  right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition);
+}
+.toggle-pwd:hover { color: var(--ocean); }
+
+/* ── FORGOT PASSWORD ── */
+.forgot {
+  text-align: right;
+  margin-top: -6px;
+}
+.forgot a {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--sky);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.forgot a:hover { color: var(--navy); }
+
+/* ── LOGIN BUTTON ── */
+.btn-login {
+  width: 100%;
+  padding: 16px;
+  margin-top: 6px;
+  border: none;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--ocean) 0%, var(--navy) 100%);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(33,72,192,.35);
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.btn-login::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.15) 0%, transparent 60%);
+  border-radius: inherit;
+}
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(33,72,192,.45);
+}
+.btn-login:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(33,72,192,.30);
+}
+
+/* ── DIVIDER ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  color: var(--text-light);
+  font-size: 12px;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(91,155,213,.25);
+}
+
+/* ── FOOTER TEXT ── */
+.footer-text {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-mid);
+  margin-top: 8px;
+}
+.footer-text a {
+  color: var(--ocean);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.footer-text a:hover { color: var(--navy); }
+
+/* ── DECORATIVE WATER DROPS ── */
+.drop {
+  position: absolute;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: rgba(91,155,213,.08);
+  pointer-events: none;
+}
+.drop-1 { width: 120px; height: 140px; top: 55%; right: -30px; transform: rotate(20deg);  }
+.drop-2 { width: 80px;  height: 95px;  top: 65%; left:  -20px; transform: rotate(-15deg); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (min-width: 480px) {
+  .page { justify-content: center; }
+
+  .shell {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 80px rgba(26,45,109,.25);
+    background: var(--foam);
+    overflow: hidden;
+  }
+}
