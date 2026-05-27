@@ -15,7 +15,7 @@
 const API_BASE = "https://hydrohub-xrep.onrender.com";
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("hh_token");
   return {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),

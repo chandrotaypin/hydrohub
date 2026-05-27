@@ -425,7 +425,7 @@ async function deleteRecord(orderId) {
   if (!ok) return;
 
   try {
-    const res = await fetch(`/washOrder/${orderId}`, { method: 'DELETE' });
+    const res = await fetch(`https://hydrohub-xrep.onrender.com/washOrder/${orderId}`, { method: 'DELETE' });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
