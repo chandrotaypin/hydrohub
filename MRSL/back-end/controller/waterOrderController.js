@@ -137,18 +137,17 @@ const updateWaterOrderStatus = async (req, res) => {
       data: { status: normalizedStatus },
     });
 
+    // Fire-and-forget — don't await so the HTTP response is never blocked
     if (normalizedStatus === "READY" && updatedOrder.email) {
-      try {
-        await sendReadyNotification({
-          to: updatedOrder.email,
-          customerName: updatedOrder.customerName,
-          orderType: "Water Refilling",
-          orderId: updatedOrder.id,
-          totalPrice: updatedOrder.totalPrice,
-        });
-      } catch (mailError) {
-        console.error("Failed to send ready notification email:", mailError);
-      }
+      sendReadyNotification({
+        to: updatedOrder.email,
+        customerName: updatedOrder.customerName,
+        orderType: "Water Refilling",
+        orderId: updatedOrder.id,
+        totalPrice: updatedOrder.totalPrice,
+      }).catch((mailError) =>
+        console.error("Failed to send ready notification email:", mailError)
+      );
     }
 
     return res.status(200).json({

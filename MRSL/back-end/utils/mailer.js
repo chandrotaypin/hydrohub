@@ -6,6 +6,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
+  connectionTimeout: 8000,  // 8s to establish TCP connection
+  greetingTimeout: 8000,    // 8s to receive SMTP greeting
+  socketTimeout: 15000,     // 15s of inactivity before aborting
 });
 
 export const sendReadyNotification = async ({ to, customerName, orderType, orderId, totalPrice }) => {
@@ -145,13 +148,24 @@ export const sendReadyNotification = async ({ to, customerName, orderType, order
     </html>
   `;
 
+  const sendWithTimeout = new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error("Email send timed out after 20s")),
+      20000
+    );
+    transporter
+      .sendMail({
+        from: `"HydroHUB" <${process.env.GMAIL_USER}>`,
+        to,
+        subject,
+        html,
+      })
+      .then((info) => { clearTimeout(timer); resolve(info); })
+      .catch((err)  => { clearTimeout(timer); reject(err);  });
+  });
+
   try {
-    const info = await transporter.sendMail({
-      from: `"HydroHUB" <${process.env.GMAIL_USER}>`,
-      to,
-      subject,
-      html,
-    });
+    const info = await sendWithTimeout;
     console.log("✅ Email sent successfully:", info.messageId);
   } catch (error) {
     console.error("❌ Email send failed:", error.message);

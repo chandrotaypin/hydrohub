@@ -118,20 +118,18 @@ const updateOrderStatus = async (req, res) => {
       data: { status: normalizedStatus },
     });
 
-    // Send email when status becomes READY
+    // Send email when status becomes READY — fire-and-forget so it never
+    // blocks the HTTP response even if SMTP is slow or unavailable.
     if (normalizedStatus === "READY" && updatedOrder.email) {
-      try {
-        await sendReadyNotification({
-          to: updatedOrder.email,
-          customerName: updatedOrder.customerName,
-          orderType: "Laundry",
-          orderId: updatedOrder.id,
-          totalPrice: updatedOrder.totalPrice,
-        });
-      } catch (mailError) {
-        console.error("Failed to send ready notification email:", mailError);
-        // Non-fatal: order update still succeeds even if email fails
-      }
+      sendReadyNotification({
+        to: updatedOrder.email,
+        customerName: updatedOrder.customerName,
+        orderType: "Laundry",
+        orderId: updatedOrder.id,
+        totalPrice: updatedOrder.totalPrice,
+      }).catch((mailError) =>
+        console.error("Failed to send ready notification email:", mailError)
+      );
     }
 
     return res.status(200).json({
