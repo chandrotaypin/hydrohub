@@ -12,7 +12,7 @@ const _claims = requireAuth();
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 // Empty string = same origin. Works in both dev (via proxy) and production.
-const API_BASE  = "";
+const API_BASE  = "https://hydrohub-xrep.onrender.com";
 const STATS_URL = `${API_BASE}/stats/dashboard`;
 
 const REFRESH_INTERVAL_MS = 30_000;

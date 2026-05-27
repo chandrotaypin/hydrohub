@@ -12,6 +12,8 @@
 
 // ─── Auth / fetch helpers ─────────────────────────────────────────────────────
 
+const API_BASE = "https://hydrohub-xrep.onrender.com";
+
 function getAuthHeaders() {
   const token = localStorage.getItem("token");
   return {

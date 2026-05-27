@@ -8,7 +8,7 @@
  *              totalPrice, status, createdAt, updatedAt
  */
 
-const API_BASE = '/waterOrder';
+const API_BASE = 'https://hydrohub-xrep.onrender.com/waterOrder';
 
 /* ── State ── */
 let allRecords   = [];

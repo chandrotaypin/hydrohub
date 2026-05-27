@@ -4,7 +4,7 @@
  * and renders them into both the mobile card list and the desktop table.
  */
 
-const API_BASE = '/washOrder/claimed';
+const API_BASE = 'https://hydrohub-xrep.onrender.com/washOrder/claimed';
 
 /* ── State ── */
 let allRecords   = [];

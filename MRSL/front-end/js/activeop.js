@@ -9,7 +9,7 @@
 const _claims = requireAuth();
 
 // ─── Config ──────────────────────────────────────────────────────────────────
-const API_BASE = '';
+const API_BASE = 'https://hydrohub-xrep.onrender.com';
 
 const NEXT_STATUS = {
   PENDING: 'WASHING',
