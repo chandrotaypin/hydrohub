@@ -1,8 +1,26 @@
-const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+import nodemailer from "nodemailer";
+
+// Creates a transporter using Gmail SMTP.
+// Requires these env vars in Render:
+//   GMAIL_USER=hydrohubcdo@gmail.com
+//   GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx   ← 16-char App Password (NOT your real password)
+const createTransporter = () =>
+  nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
 
 export const sendReadyNotification = async ({ to, customerName, orderType, orderId, totalPrice }) => {
   console.log("📧 Attempting to send email to:", to);
-  console.log("📧 BREVO_API_KEY set:", !!process.env.BREVO_API_KEY);
+  console.log("📧 GMAIL_USER set:", !!process.env.GMAIL_USER);
+  console.log("📧 GMAIL_APP_PASSWORD set:", !!process.env.GMAIL_APP_PASSWORD);
+
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    throw new Error("GMAIL_USER or GMAIL_APP_PASSWORD is not set — cannot send email.");
+  }
 
   const subject = `Your ${orderType} Order #${orderId} is Ready for Pickup!`;
 
@@ -136,26 +154,14 @@ export const sendReadyNotification = async ({ to, customerName, orderType, order
     </html>
   `;
 
-  const response = await fetch(BREVO_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": process.env.BREVO_API_KEY,
-    },
-    body: JSON.stringify({
-      sender: { name: "HydroHUB", email: "hydrohubCDO@gmail.com" },
-      to: [{ email: to, name: customerName }],
-      subject,
-      htmlContent: html,
-    }),
+  const transporter = createTransporter();
+
+  const info = await transporter.sendMail({
+    from: `"HydroHUB" <${process.env.GMAIL_USER}>`,
+    to,
+    subject,
+    html,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error("❌ Email send failed:", errorData);
-    throw new Error(errorData.message || "Brevo email send failed");
-  }
-
-  const data = await response.json();
-  console.log("✅ Email sent successfully:", data.messageId);
+  console.log("✅ Email sent successfully. messageId:", info.messageId);
 };
