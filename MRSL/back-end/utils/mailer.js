@@ -1,10 +1,8 @@
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
 export const sendReadyNotification = async ({ to, customerName, orderType, orderId, totalPrice }) => {
   console.log("📧 Attempting to send email to:", to);
-  console.log("📧 RESEND_API_KEY set:", !!process.env.RESEND_API_KEY);
+  console.log("📧 BREVO_API_KEY set:", !!process.env.BREVO_API_KEY);
 
   const subject = `Your ${orderType} Order #${orderId} is Ready for Pickup!`;
 
@@ -101,7 +99,7 @@ export const sendReadyNotification = async ({ to, customerName, orderType, order
               <tr>
                 <td style="padding: 8px 40px 28px;">
                   <table width="100%" cellpadding="0" cellspacing="0"
-                    style="background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0; padding: 0;">
+                    style="background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0;">
                     <tr>
                       <td style="padding: 12px 16px;">
                         <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
@@ -138,17 +136,26 @@ export const sendReadyNotification = async ({ to, customerName, orderType, order
     </html>
   `;
 
-  const { data, error } = await resend.emails.send({
-    from: "HydroHUB <onboarding@resend.dev>",
-    to,
-    subject,
-    html,
+  const response = await fetch(BREVO_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: { name: "HydroHUB", email: "hydrohubCDO@gmail.com" },
+      to: [{ email: to, name: customerName }],
+      subject,
+      htmlContent: html,
+    }),
   });
 
-  if (error) {
-    console.error("❌ Email send failed:", error);
-    throw new Error(error.message);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("❌ Email send failed:", errorData);
+    throw new Error(errorData.message || "Brevo email send failed");
   }
 
-  console.log("✅ Email sent successfully:", data.id);
+  const data = await response.json();
+  console.log("✅ Email sent successfully:", data.messageId);
 };
