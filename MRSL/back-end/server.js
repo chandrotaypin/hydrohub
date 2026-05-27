@@ -18,7 +18,9 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors({
-  origin: 'https://hydrohub-nine.vercel.app'
+  origin: 'https://hydrohub-nine.vercel.app',
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
