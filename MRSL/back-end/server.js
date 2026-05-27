@@ -9,7 +9,7 @@ import orderRoute from "./routes/orderRoute.js";
 import adminloginRoute from "./routes/adminloginRoute.js";
 import waterOrderRoute from "./routes/waterOrderRoute.js";
 import transactionRoute from "./routes/transactionRoute.js";
-import statsRoute from "./routes/statsRoute.js";
+import statsRoute from "./routes/statsroute.js";
 
 config();
 connectDB();
