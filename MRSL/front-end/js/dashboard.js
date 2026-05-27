@@ -86,19 +86,23 @@ function renderStats(data) {
 
 // ─── Fetch ────────────────────────────────────────────────────────────────────
 
-async function fetchAndRender() {
+async function fetchAndRender(retries = 3) {
   try {
     const res = await fetch(STATS_URL);
 
     if (!res.ok) {
       console.error(`[dashboard] Stats fetch failed: ${res.status} ${res.statusText}`);
-      return;
+      throw new Error(`HTTP ${res.status}`);
     }
 
     const data = await res.json();
     renderStats(data);
   } catch (err) {
     console.error("[dashboard] Could not reach stats endpoint:", err.message);
+    if (retries > 0) {
+      console.log(`[dashboard] Retrying in 6s… (${retries} attempts left)`);
+      setTimeout(() => fetchAndRender(retries - 1), 6000);
+    }
   }
 }
 

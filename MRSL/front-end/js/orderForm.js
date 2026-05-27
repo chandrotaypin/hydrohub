@@ -34,7 +34,8 @@ function formatPeso(amount) {
 // ─── Price constants & calculators ───────────────────────────────────────────
 
 const LAUNDRY_PRICES = { wash: 100, wash_dry_fold: 200 };
-const WATER_PRICES   = { refill: 25, new_container: 130 };
+// Keys match the DB enum values expected by Prisma (REFILL / NEW_CONTAINER)
+const WATER_PRICES   = { REFILL: 25, NEW_CONTAINER: 130 };
 const KG_PER_LOAD    = 8;
 
 function calcLaundryTotal(weight, serviceType) {
@@ -60,7 +61,9 @@ function updateLaundryPreview() {
 function updateWaterPreview() {
   const qty         = parseInt(document.getElementById("w-qty")?.value, 10);
   const form        = document.getElementById("form-water");
-  const serviceType = form?.querySelector('input[name="w-service"]:checked')?.value ?? "refill";
+  const rawService  = form?.querySelector('input[name="w-service"]:checked')?.value ?? "";
+  // Normalise to uppercase DB enum value for price lookup
+  const serviceType = rawService.toUpperCase().replace(/-/g, '_');
   const el          = document.getElementById("w-total-preview");
   if (el) el.textContent = formatPeso(calcWaterTotal(qty, serviceType));
 }
@@ -537,7 +540,9 @@ function reviewWaterOrder(e) {
 
   const customerName  = document.getElementById("w-name").value.trim();
   const email         = document.getElementById("w-email").value.trim();
-  const serviceType   = form.querySelector('input[name="w-service"]:checked')?.value ?? "";
+  const rawService    = form.querySelector('input[name="w-service"]:checked')?.value ?? "";
+  // Normalise to the uppercase DB enum Prisma expects: "REFILL" | "NEW_CONTAINER"
+  const serviceType   = rawService.toUpperCase().replace(/-/g, '_');
   const quantity      = parseInt(document.getElementById("w-qty").value, 10);
   const paymentStatus = form.querySelector('input[name="w-payment-status"]:checked')?.value ?? "UNPAID";
 
@@ -553,7 +558,7 @@ function reviewWaterOrder(e) {
 
   const totalPrice = calcWaterTotal(quantity, serviceType);
 
-  const serviceLabel = serviceType === "refill" ? "Refill" : "New Container";
+  const serviceLabel = serviceType === "REFILL" ? "Refill" : "New Container";
   const unitPrice    = WATER_PRICES[serviceType];
 
   showConfirmPanel({
