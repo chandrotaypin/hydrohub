@@ -12,7 +12,7 @@
 
 // ─── Auth / fetch helpers ─────────────────────────────────────────────────────
 
-const API_BASE = "https://hydrohub-xrep.onrender.com";
+// API_BASE is declared in dashboard.js (loaded before this script)
 
 function getAuthHeaders() {
   const token = localStorage.getItem("hh_token");
@@ -34,8 +34,7 @@ function formatPeso(amount) {
 // ─── Price constants & calculators ───────────────────────────────────────────
 
 const LAUNDRY_PRICES = { wash: 100, wash_dry_fold: 200 };
-// Keys match the DB enum values expected by Prisma (REFILL / NEW_CONTAINER)
-const WATER_PRICES   = { REFILL: 25, NEW_CONTAINER: 130 };
+const WATER_PRICES   = { refill: 25, new_container: 130 };
 const KG_PER_LOAD    = 8;
 
 function calcLaundryTotal(weight, serviceType) {
@@ -61,9 +60,7 @@ function updateLaundryPreview() {
 function updateWaterPreview() {
   const qty         = parseInt(document.getElementById("w-qty")?.value, 10);
   const form        = document.getElementById("form-water");
-  const rawService  = form?.querySelector('input[name="w-service"]:checked')?.value ?? "";
-  // Normalise to uppercase DB enum value for price lookup
-  const serviceType = rawService.toUpperCase().replace(/-/g, '_');
+  const serviceType = form?.querySelector('input[name="w-service"]:checked')?.value ?? "refill";
   const el          = document.getElementById("w-total-preview");
   if (el) el.textContent = formatPeso(calcWaterTotal(qty, serviceType));
 }
@@ -540,9 +537,7 @@ function reviewWaterOrder(e) {
 
   const customerName  = document.getElementById("w-name").value.trim();
   const email         = document.getElementById("w-email").value.trim();
-  const rawService    = form.querySelector('input[name="w-service"]:checked')?.value ?? "";
-  // Normalise to the uppercase DB enum Prisma expects: "REFILL" | "NEW_CONTAINER"
-  const serviceType   = rawService.toUpperCase().replace(/-/g, '_');
+  const serviceType   = form.querySelector('input[name="w-service"]:checked')?.value ?? "";
   const quantity      = parseInt(document.getElementById("w-qty").value, 10);
   const paymentStatus = form.querySelector('input[name="w-payment-status"]:checked')?.value ?? "UNPAID";
 
@@ -558,7 +553,7 @@ function reviewWaterOrder(e) {
 
   const totalPrice = calcWaterTotal(quantity, serviceType);
 
-  const serviceLabel = serviceType === "REFILL" ? "Refill" : "New Container";
+  const serviceLabel = serviceType === "refill" ? "Refill" : "New Container";
   const unitPrice    = WATER_PRICES[serviceType];
 
   showConfirmPanel({
