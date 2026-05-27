@@ -1,12 +1,10 @@
 import nodemailer from "nodemailer";
 
-// Creates a transporter using Gmail SMTP.
-// Requires these env vars in Render:
-//   GMAIL_USER=hydrohubcdo@gmail.com
-//   GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx   ← 16-char App Password (NOT your real password)
 const createTransporter = () =>
   nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // STARTTLS
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_APP_PASSWORD,
@@ -14,12 +12,13 @@ const createTransporter = () =>
   });
 
 export const sendReadyNotification = async ({ to, customerName, orderType, orderId, totalPrice }) => {
-  console.log("📧 Attempting to send email to:", to);
-  console.log("📧 GMAIL_USER set:", !!process.env.GMAIL_USER);
+  console.log("📧 sendReadyNotification called");
+  console.log("📧 To:", to);
+  console.log("📧 GMAIL_USER set:", !!process.env.GMAIL_USER, "→", process.env.GMAIL_USER);
   console.log("📧 GMAIL_APP_PASSWORD set:", !!process.env.GMAIL_APP_PASSWORD);
 
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    throw new Error("GMAIL_USER or GMAIL_APP_PASSWORD is not set — cannot send email.");
+    throw new Error("GMAIL_USER or GMAIL_APP_PASSWORD env var is missing.");
   }
 
   const subject = `Your ${orderType} Order #${orderId} is Ready for Pickup!`;
@@ -156,6 +155,10 @@ export const sendReadyNotification = async ({ to, customerName, orderType, order
 
   const transporter = createTransporter();
 
+  // Verify SMTP connection — logs exact auth errors to Render
+  await transporter.verify();
+  console.log("✅ SMTP connection verified");
+
   const info = await transporter.sendMail({
     from: `"HydroHUB" <${process.env.GMAIL_USER}>`,
     to,
@@ -163,5 +166,5 @@ export const sendReadyNotification = async ({ to, customerName, orderType, order
     html,
   });
 
-  console.log("✅ Email sent successfully. messageId:", info.messageId);
+  console.log("✅ Email sent! messageId:", info.messageId);
 };

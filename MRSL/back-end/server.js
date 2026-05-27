@@ -30,6 +30,26 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ─── Email test route (remove after confirming email works) ──────────────────
+import { sendReadyNotification } from "./utils/mailer.js";
+app.get("/test-email", async (req, res) => {
+  const to = req.query.to;
+  if (!to) return res.status(400).json({ error: "Pass ?to=youremail@gmail.com" });
+  try {
+    await sendReadyNotification({
+      to,
+      customerName: "Test Customer",
+      orderType: "Laundry",
+      orderId: 9999,
+      totalPrice: 200,
+    });
+    return res.json({ success: true, message: `Email sent to ${to}` });
+  } catch (err) {
+    console.error("Test email failed:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // API Routes
 app.use("/stats", statsRoute);
 app.use("/washOrder", orderRoute);
