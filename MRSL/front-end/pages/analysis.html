@@ -863,7 +863,10 @@
       const map = {};
       orders.forEach(o => {
         if (!o.createdAt) return;
-        const d = new Date(o.createdAt);
+        // Parse as local date to avoid UTC-to-local shift (e.g. PH = UTC+8)
+        const dateStr = o.createdAt.slice(0, 10); // "YYYY-MM-DD"
+        const [yr, mo, dy] = dateStr.split('-').map(Number);
+        const d = new Date(yr, mo - 1, dy); // local midnight — no timezone shift
         // ISO week key: YYYY-Www
         const jan4 = new Date(d.getFullYear(), 0, 4);
         const wk = Math.ceil(((d - jan4) / 86400000 + jan4.getDay() + 1) / 7);
