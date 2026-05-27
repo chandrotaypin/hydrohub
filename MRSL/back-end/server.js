@@ -30,7 +30,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ─── Email test route (remove after confirming email works) ──────────────────
+// ─── Email test route — visit /test-email?to=youremail@gmail.com ─────────────
 import { sendReadyNotification } from "./utils/mailer.js";
 app.get("/test-email", async (req, res) => {
   const to = req.query.to;
@@ -43,7 +43,7 @@ app.get("/test-email", async (req, res) => {
       orderId: 9999,
       totalPrice: 200,
     });
-    return res.json({ success: true, message: `Email sent to ${to}` });
+    return res.json({ success: true, message: `Email sent via EmailJS to ${to}` });
   } catch (err) {
     console.error("Test email failed:", err);
     return res.status(500).json({ error: err.message });
