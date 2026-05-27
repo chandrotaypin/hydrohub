@@ -2,7 +2,7 @@
 // Fetches data from /stats/dashboard, /washOrder, /washOrder/claimed,
 // /waterOrder — and renders all charts + stat cards for the Analytics tab.
 
-const BASE_URL = "";   // change to "http://localhost:5001" if running standalone
+const BASE_URL = "https://hydrohub-xrep.onrender.com";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
