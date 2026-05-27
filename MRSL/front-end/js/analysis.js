@@ -404,22 +404,50 @@ const phDateKey = (isoStr) => {
   catch { return "unknown"; }
 };
 
-function renderTimelineChart(allLaundry, waterOrders) {
+// ── Period-aware bucketing helpers ───────────────────────────────────────────
+function _phDateParts(isoStr) {
+  const d = new Date(isoStr);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(d);
+  const get = (t) => parts.find(p => p.type === t).value;
+  return { year: get("year"), month: get("month"), day: get("day") };
+}
+
+function _bucketKey(isoStr, period) {
+  if (!isoStr) return "unknown";
+  try {
+    const { year, month, day } = _phDateParts(isoStr);
+    if (period === "Monthly") return `${year}-${month}`;
+    if (period === "Weekly") {
+      const d = new Date(Number(year), Number(month) - 1, Number(day));
+      const jan4 = new Date(d.getFullYear(), 0, 4);
+      const wk = Math.ceil(((d - jan4) / 86400000 + jan4.getDay() + 1) / 7);
+      return `${d.getFullYear()}-W${String(wk).padStart(2, "0")}`;
+    }
+    return `${year}-${month}-${day}`; // Daily (default)
+  } catch { return "unknown"; }
+}
+
+function _groupOrders(orders, period) {
+  const map = {};
+  orders.forEach((o) => {
+    const key = _bucketKey(o.createdAt, period);
+    map[key] = (map[key] ?? 0) + 1;
+  });
+  return map;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderTimelineChart(allLaundry, waterOrders, period) {
+  period = period || window.currentPeriod || "Daily";
   destroyChart("timeline");
   const ctx = el("chart-timeline");
   if (!ctx) return;
 
-  const laundryByDate = {};
-  allLaundry.forEach((o) => {
-    const d = phDateKey(o.createdAt);
-    laundryByDate[d] = (laundryByDate[d] ?? 0) + 1;
-  });
-
-  const waterByDate = {};
-  waterOrders.forEach((o) => {
-    const d = phDateKey(o.createdAt);
-    waterByDate[d] = (waterByDate[d] ?? 0) + 1;
-  });
+  const laundryByDate = _groupOrders(allLaundry, period);
+  const waterByDate   = _groupOrders(waterOrders, period);
 
   const allDates = [...new Set([...Object.keys(laundryByDate), ...Object.keys(waterByDate)])]
     .filter((d) => d !== "unknown")
@@ -540,6 +568,10 @@ async function renderAnalytics() {
 
     const allLaundry = [...activeOrders, ...claimedOrders];
 
+    // Cache for period-switching re-renders
+    window._cachedLaundry = allLaundry;
+    window._cachedWater   = waterOrders;
+
     // Cards
     updateSummaryCards(dashboard, allLaundry, waterOrders);
 
@@ -606,3 +638,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Export for tab-based usage
 window.renderAnalytics = renderAnalytics;
+
+// ─── Period re-render helper (called by setPeriod in the HTML) ────────────────
+window.rerenderTimelineChart = function(period) {
+  const laundry = window._cachedLaundry ?? [];
+  const water   = window._cachedWater   ?? [];
+  renderTimelineChart(laundry, water, period);
+};

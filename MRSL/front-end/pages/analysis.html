@@ -816,6 +816,7 @@
 
     function setPeriod(btn, label) {
       currentPeriod = label;
+      window.currentPeriod = label;
       document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.period-text').forEach(el => el.textContent = label);
@@ -1041,8 +1042,11 @@
       const _origSetPeriod = window.setPeriod;
       window.setPeriod = function(btn, label) {
         _origSetPeriod(btn, label);
-        // Re-render per-service timelines with new grouping
-        // (needs cached orders — re-fetch)
+        // Re-render the combined timeline chart (analysis.js) with new period
+        if (typeof window.rerenderTimelineChart === 'function') {
+          window.rerenderTimelineChart(label);
+        }
+        // Re-render per-service timelines with new grouping (re-fetch)
         const BASE = "https://hydrohub-xrep.onrender.com";
         Promise.all([
           fetch(`${BASE}/washOrder`).then(r => r.json()),
