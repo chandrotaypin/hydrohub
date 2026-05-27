@@ -219,11 +219,16 @@ async function confirmStatusUpdate() {
   confirmBtn.textContent = 'Updating…';
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
     const res = await fetch(`${API_BASE}/washOrder/${orderId}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: nextStatus }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -235,8 +240,12 @@ async function confirmStatusUpdate() {
     pendingAction = null;
     await loadOrders();
   } catch (err) {
-    console.error('Network error:', err);
-    alert('Network error — please try again.');
+    if (err.name === 'AbortError') {
+      alert('Request timed out — the server took too long. Please try again.');
+    } else {
+      console.error('Network error:', err);
+      alert('Network error — please try again.');
+    }
   } finally {
     confirmBtn.disabled = false;
     confirmBtn.innerHTML = `
