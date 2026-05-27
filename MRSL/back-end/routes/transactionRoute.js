@@ -3,6 +3,7 @@ import {
   createTransaction,
   getAllTransactions,
   getTransactionById,
+  deleteTransaction,
 } from "../controller/transactionController.js";
 
 const router = Router();
@@ -15,5 +16,7 @@ router.get("/", getAllTransactions);
 
 // GET  /api/transactions/:id   — fetch a single transaction by ID
 router.get("/:id", getTransactionById);
+
+router.delete("/:id", deleteTransaction);
 
 export default router;

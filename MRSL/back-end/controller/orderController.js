@@ -186,6 +186,32 @@ const getClaimedOrders = async (req, res) => {
   }
 };
 
+const deleteOrder = async (req, res) => {
+  const { id } = req.params;
+
+  const orderId = parseInt(id);
+  if (isNaN(orderId)) {
+    return res.status(400).json({ error: "Invalid order ID." });
+  }
+
+  try {
+    const existingOrder = await prisma.order.findUnique({ where: { id: orderId } });
+    if (!existingOrder) {
+      return res.status(404).json({ error: "Order not found." });
+    }
+
+    await prisma.$transaction([
+      prisma.transaction.deleteMany({ where: { orderId } }),
+      prisma.order.delete({ where: { id: orderId } }),
+    ]);
+
+    return res.status(200).json({ message: "Order deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 const updateOrderPaymentStatus = async (req, res) => {
   const { id } = req.params;
   const { paymentStatus } = req.body;
@@ -227,6 +253,7 @@ export {
   createOrder,
   updateOrderStatus,
   updateOrderPaymentStatus,
+  deleteOrder,
   getActiveOrders,
   getClaimedOrders,
 };

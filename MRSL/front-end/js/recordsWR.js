@@ -232,9 +232,14 @@ function buildMobCard(order, idx) {
         </span>
       </div>
       <span class="card-date">${date}</span>
+      ${deleteRecordBtn(order.id)}
     </div>
   `;
 
+  el.querySelector('.record-delete-btn')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    deleteRecord(order.id);
+  });
   el.addEventListener('click', () => openDrawer(order));
   return el;
 }
@@ -266,8 +271,13 @@ function buildDeskRow(order, idx) {
     <td class="td-date">${timeOut}</td>
     <td class="td-price">${formatPrice(order.totalPrice)}</td>
     <td><span class="badge badge-payment">Cash</span></td>
+    <td>${deleteRecordBtn(order.id)}</td>
   `;
 
+  tr.querySelector('.record-delete-btn')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    deleteRecord(order.id);
+  });
   tr.addEventListener('click', () => openModal(order));
   return tr;
 }
@@ -393,6 +403,37 @@ function escHtml(str) {
     .replace(/</g,  '&lt;')
     .replace(/>/g,  '&gt;')
     .replace(/"/g,  '&quot;');
+}
+
+function deleteRecordBtn(orderId) {
+  return `
+    <button class="record-delete-btn" type="button" aria-label="Delete record" data-delete-order="${orderId}">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 7h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M6 7l1 14h10l1-14M9 7V4h6v3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>`;
+}
+
+async function deleteRecord(orderId) {
+  const ok = confirm(`Delete water record #${orderId}? This will remove it from the database.`);
+  if (!ok) return;
+
+  try {
+    const res = await fetch(`/waterOrder/${orderId}`, { method: 'DELETE' });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert('Delete failed: ' + (err.error || res.statusText));
+      return;
+    }
+
+    await loadRecords();
+  } catch (err) {
+    console.error('Delete record error:', err);
+    alert('Network error - please try again.');
+  }
 }
 
 /* ════════════════════════════════════════════

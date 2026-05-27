@@ -58,6 +58,13 @@ function serviceBadge(serviceType) {
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
+function paymentBadge(order) {
+  const paid = String(order.paymentStatus || '').toUpperCase() === 'PAID';
+  return paid
+    ? '<span class="badge paid">Paid</span>'
+    : '<span class="badge unpaid">Unpaid</span>';
+}
+
 function checkBtn(orderId, status) {
   return `
     <button class="check-btn" data-order="${orderId}" data-status="${status}" aria-label="Mark as ready">
@@ -65,6 +72,21 @@ function checkBtn(orderId, status) {
         <path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>`;
+}
+
+function deleteBtn(orderId) {
+  return `
+    <button class="delete-btn" data-delete-order="${orderId}" aria-label="Delete order">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 7h16" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M10 11v6M14 11v6" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M6 7l1 14h10l1-14M9 7V4h6v3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>`;
+}
+
+function actionButtons(order) {
+  return `<div class="action-buttons">${checkBtn(order.id, order.status)}${deleteBtn(order.id)}</div>`;
 }
 
 // ─── Builders ────────────────────────────────────────────────────────────────
@@ -79,9 +101,10 @@ function buildMobileCard(order) {
         <div class="order-footer">
           <span class="order-price">&#8369;${order.totalPrice.toLocaleString()}</span>
           ${serviceBadge(order.serviceType)}
+          ${paymentBadge(order)}
         </div>
       </div>
-      ${checkBtn(order.id, order.status)}
+      ${actionButtons(order)}
     </div>`;
 }
 
@@ -94,7 +117,8 @@ function buildDesktopRow(order) {
       <td>${order.quantity}</td>
       <td>${formatTime(order.createdAt)}</td>
       <td><span class="t-price">&#8369;${order.totalPrice.toLocaleString()}</span></td>
-      <td>${checkBtn(order.id, order.status)}</td>
+      <td>${paymentBadge(order)}</td>
+      <td>${actionButtons(order)}</td>
     </tr>`;
 }
 
@@ -112,13 +136,14 @@ function renderOrders(orders) {
   const tbody = document.getElementById('desk-tbody-pending');
   tbody.innerHTML = pendingOrders.length
     ? pendingOrders.map(buildDesktopRow).join('')
-    : '<tr><td colspan="7" class="empty-state">No pending water orders</td></tr>';
+    : '<tr><td colspan="8" class="empty-state">No pending water orders</td></tr>';
 
   // Chip counter
   document.getElementById('chip-pending').innerHTML =
     `<span class="chip-dot cyan"></span> ${pendingOrders.length} Pending`;
 
   attachCheckListeners();
+  attachDeleteListeners();
 }
 
 // ─── Event: check buttons ─────────────────────────────────────────────────────
@@ -137,6 +162,37 @@ function attachCheckListeners() {
       document.getElementById('modal-next-status').textContent = STATUS_LABEL[nextStatus] || nextStatus;
 
       openModal();
+    });
+  });
+}
+
+function attachDeleteListeners() {
+  document.querySelectorAll('[data-delete-order]').forEach(btn => {
+    btn.addEventListener('click', async function () {
+      const orderId = this.dataset.deleteOrder;
+      const ok = confirm(`Delete water order #${orderId}? This will remove it from the database.`);
+      if (!ok) return;
+
+      this.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/waterOrder/${orderId}`, {
+          method: 'DELETE',
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          alert('Delete failed: ' + (err.error || res.statusText));
+          return;
+        }
+
+        await loadOrders();
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert('Network error - please try again.');
+      } finally {
+        this.disabled = false;
+      }
     });
   });
 }
@@ -207,7 +263,7 @@ async function loadOrders() {
     const mob  = document.getElementById('mob-list-pending');
     const desk = document.getElementById('desk-tbody-pending');
     if (mob)  mob.innerHTML  = '<p class="empty-state">Failed to load orders.</p>';
-    if (desk) desk.innerHTML = '<tr><td colspan="7" class="empty-state">Failed to load orders.</td></tr>';
+    if (desk) desk.innerHTML = '<tr><td colspan="8" class="empty-state">Failed to load orders.</td></tr>';
   }
 }
 

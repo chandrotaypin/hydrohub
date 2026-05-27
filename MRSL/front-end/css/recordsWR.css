@@ -103,6 +103,29 @@ html, body {
   border-radius: 20px;
 }
 
+.record-delete-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(239,68,68,0.24);
+  background: rgba(239,68,68,0.1);
+  color: #b91c1c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+.record-delete-btn:hover {
+  transform: scale(1.06);
+  background: #ef4444;
+  color: #ffffff;
+}
+.record-delete-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
 
 /* ============================================================
    MOBILE FRAME

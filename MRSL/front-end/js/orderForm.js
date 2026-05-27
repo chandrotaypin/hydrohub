@@ -362,7 +362,18 @@ function showConfirmPanel(cfg) {
 function closeModal() {
   history.replaceState(null, "", location.pathname + location.search);
   const overlay = document.getElementById("newOrderModal");
-  if (overlay) overlay.style.display = "none";
+  if (overlay) overlay.style.removeProperty("display");
+}
+
+function syncModalWithHash() {
+  const overlay = document.getElementById("newOrderModal");
+  if (!overlay) return;
+
+  if (location.hash === "#newOrderModal") {
+    overlay.style.removeProperty("display");
+  } else {
+    resetModal();
+  }
 }
 
 function resetModal() {
@@ -625,16 +636,21 @@ document.addEventListener("DOMContentLoaded", () => {
   initQtyStepper();
 
   // ── Reset when modal closes (hash leaves #newOrderModal) ──
-  window.addEventListener("hashchange", () => {
-    if (!location.hash.includes("newOrderModal")) resetModal();
-  });
+  window.addEventListener("hashchange", syncModalWithHash);
 
   // ── Cancel / close buttons ──
-  document.querySelectorAll(".modal-close, .btn-cancel").forEach((btn) =>
+  document.querySelectorAll(".modal-close").forEach((btn) =>
     btn.addEventListener("click", resetModal)
+  );
+  document.querySelectorAll(".btn-cancel").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      closeModal();
+      resetModal();
+    })
   );
 
   // ── Initial preview ──
+  syncModalWithHash();
   updateLaundryPreview();
   updateWaterPreview();
 });

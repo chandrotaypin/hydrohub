@@ -151,4 +151,30 @@ const getTransactionById = async (req, res) => {
   }
 };
 
-export { createTransaction, getAllTransactions, getTransactionById };
+const deleteTransaction = async (req, res) => {
+  const { id } = req.params;
+
+  const transactionId = parseInt(id);
+  if (isNaN(transactionId)) {
+    return res.status(400).json({ error: "Invalid transaction ID." });
+  }
+
+  try {
+    const existingTransaction = await prisma.transaction.findUnique({
+      where: { id: transactionId },
+    });
+
+    if (!existingTransaction) {
+      return res.status(404).json({ error: "Transaction not found." });
+    }
+
+    await prisma.transaction.delete({ where: { id: transactionId } });
+
+    return res.status(200).json({ message: "Transaction deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+export { createTransaction, getAllTransactions, getTransactionById, deleteTransaction };

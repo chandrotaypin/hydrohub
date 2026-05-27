@@ -198,9 +198,36 @@ const updateWaterOrderPaymentStatus = async (req, res) => {
   }
 };
 
+const deleteWaterOrder = async (req, res) => {
+  const { id } = req.params;
+
+  const orderId = parseInt(id);
+  if (isNaN(orderId)) {
+    return res.status(400).json({ error: "Invalid order ID." });
+  }
+
+  try {
+    const existingOrder = await prisma.waterOrder.findUnique({ where: { id: orderId } });
+    if (!existingOrder) {
+      return res.status(404).json({ error: "Water order not found." });
+    }
+
+    await prisma.$transaction([
+      prisma.transaction.deleteMany({ where: { waterOrderId: orderId } }),
+      prisma.waterOrder.delete({ where: { id: orderId } }),
+    ]);
+
+    return res.status(200).json({ message: "Water order deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting water order:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 export {
   getWaterOrders,
   createWaterOrder,
   updateWaterOrderStatus,
   updateWaterOrderPaymentStatus,
+  deleteWaterOrder,
 };
