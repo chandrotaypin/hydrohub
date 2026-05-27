@@ -1,20 +1,10 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  connectionTimeout: 8000,  // 8s to establish TCP connection
-  greetingTimeout: 8000,    // 8s to receive SMTP greeting
-  socketTimeout: 15000,     // 15s of inactivity before aborting
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendReadyNotification = async ({ to, customerName, orderType, orderId, totalPrice }) => {
   console.log("📧 Attempting to send email to:", to);
-  console.log("📧 GMAIL_USER:", process.env.GMAIL_USER);
-  console.log("📧 GMAIL_APP_PASSWORD set:", !!process.env.GMAIL_APP_PASSWORD);
+  console.log("📧 RESEND_API_KEY set:", !!process.env.RESEND_API_KEY);
 
   const subject = `Your ${orderType} Order #${orderId} is Ready for Pickup!`;
 
@@ -148,27 +138,17 @@ export const sendReadyNotification = async ({ to, customerName, orderType, order
     </html>
   `;
 
-  const sendWithTimeout = new Promise((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(new Error("Email send timed out after 20s")),
-      20000
-    );
-    transporter
-      .sendMail({
-        from: `"HydroHUB" <${process.env.GMAIL_USER}>`,
-        to,
-        subject,
-        html,
-      })
-      .then((info) => { clearTimeout(timer); resolve(info); })
-      .catch((err)  => { clearTimeout(timer); reject(err);  });
+  const { data, error } = await resend.emails.send({
+    from: "HydroHUB <onboarding@resend.dev>",
+    to,
+    subject,
+    html,
   });
 
-  try {
-    const info = await sendWithTimeout;
-    console.log("✅ Email sent successfully:", info.messageId);
-  } catch (error) {
-    console.error("❌ Email send failed:", error.message);
-    throw error;
+  if (error) {
+    console.error("❌ Email send failed:", error);
+    throw new Error(error.message);
   }
+
+  console.log("✅ Email sent successfully:", data.id);
 };
