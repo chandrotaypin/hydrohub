@@ -11,6 +11,41 @@ const _claims = requireAuth();
 // ─── Config ──────────────────────────────────────────────────────────────────
 const API_BASE = 'https://hydrohub-xrep.onrender.com';
 
+// ─── EmailJS config ───────────────────────────────────────────────────────────
+const EJS_SERVICE_ID  = 'service_hs7b13l';
+const EJS_TEMPLATE_ID = 'template_d2jm948';
+const EJS_PUBLIC_KEY  = 'UeLvBj7roHOJyihdC';
+
+async function sendEmailJS({ to, customerName, orderType, orderId, totalPrice }) {
+  if (!to) return; // no email on file — skip silently
+  try {
+    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id:  EJS_SERVICE_ID,
+        template_id: EJS_TEMPLATE_ID,
+        user_id:     EJS_PUBLIC_KEY,
+        template_params: {
+          to_email:      to,
+          customer_name: customerName,
+          order_type:    orderType,
+          order_id:      String(orderId),
+          total_price:   String(totalPrice),
+        },
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      console.error('EmailJS error:', res.status, body);
+    } else {
+      console.log('✅ EmailJS notification sent to', to);
+    }
+  } catch (err) {
+    console.error('EmailJS fetch failed:', err);
+  }
+}
+
 const NEXT_STATUS = {
   PENDING: 'WASHING',
   WASHING: 'READY',
@@ -234,6 +269,21 @@ async function confirmStatusUpdate() {
       const err = await res.json().catch(() => ({}));
       alert('Update failed: ' + (err.error || res.statusText));
       return;
+    }
+
+    // Send email from browser when order moves to READY
+    if (nextStatus === 'READY') {
+      const data = await res.json().catch(() => ({}));
+      const updated = data.order;
+      if (updated?.email) {
+        await sendEmailJS({
+          to:           updated.email,
+          customerName: updated.customerName,
+          orderType:    'Laundry',
+          orderId:      updated.id,
+          totalPrice:   updated.totalPrice,
+        });
+      }
     }
 
     closeModal();
