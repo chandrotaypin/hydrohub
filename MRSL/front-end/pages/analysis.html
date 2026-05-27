@@ -979,7 +979,7 @@
         // Fetch orders again (analysis.js already did this; re-use cached
         // data by re-fetching — lightweight since results are usually cached)
         try {
-          const BASE = "";
+          const BASE = "https://hydrohub-xrep.onrender.com";
           const [activeRes, claimedRes, waterRes] = await Promise.all([
             fetch(`${BASE}/washOrder`).then(r => r.json()),
             fetch(`${BASE}/washOrder/claimed`).then(r => r.json()),
@@ -1024,7 +1024,7 @@
         _origSetPeriod(btn, label);
         // Re-render per-service timelines with new grouping
         // (needs cached orders — re-fetch)
-        const BASE = "";
+        const BASE = "https://hydrohub-xrep.onrender.com";
         Promise.all([
           fetch(`${BASE}/washOrder`).then(r => r.json()),
           fetch(`${BASE}/washOrder/claimed`).then(r => r.json()),
