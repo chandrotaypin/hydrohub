@@ -850,11 +850,27 @@
       new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(n ?? 0);
 
     // ─── Per-service order timeline helpers ──────────────────────────────────
+    // Convert any createdAt string to a Date object in Philippine Time (UTC+8).
+    // Using Intl.DateTimeFormat guarantees correct local date regardless of
+    // whether the API returns "2026-05-28T02:30:00.000Z" or "2026-05-28".
+    const _PH_TZ = "Asia/Manila";
+    function _phDateParts(isoStr) {
+      const d = new Date(isoStr);
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: _PH_TZ,
+        year: "numeric", month: "2-digit", day: "2-digit",
+      }).formatToParts(d);
+      const get = (t) => parts.find(p => p.type === t).value;
+      return { year: get("year"), month: get("month"), day: get("day") };
+    }
+
     function _groupByDate(orders) {
       const map = {};
       orders.forEach(o => {
-        const d = o.createdAt ? o.createdAt.slice(0, 10) : null;
-        if (d) map[d] = (map[d] ?? 0) + 1;
+        if (!o.createdAt) return;
+        const { year, month, day } = _phDateParts(o.createdAt);
+        const key = `${year}-${month}-${day}`; // YYYY-MM-DD in PH time
+        map[key] = (map[key] ?? 0) + 1;
       });
       return map;
     }
@@ -863,14 +879,12 @@
       const map = {};
       orders.forEach(o => {
         if (!o.createdAt) return;
-        // Parse as local date to avoid UTC-to-local shift (e.g. PH = UTC+8)
-        const dateStr = o.createdAt.slice(0, 10); // "YYYY-MM-DD"
-        const [yr, mo, dy] = dateStr.split('-').map(Number);
-        const d = new Date(yr, mo - 1, dy); // local midnight — no timezone shift
-        // ISO week key: YYYY-Www
+        const { year, month, day } = _phDateParts(o.createdAt);
+        // Build a local-midnight Date so week math isn't skewed by UTC offset
+        const d = new Date(Number(year), Number(month) - 1, Number(day));
         const jan4 = new Date(d.getFullYear(), 0, 4);
         const wk = Math.ceil(((d - jan4) / 86400000 + jan4.getDay() + 1) / 7);
-        const key = `${d.getFullYear()}-W${String(wk).padStart(2,'0')}`;
+        const key = `${d.getFullYear()}-W${String(wk).padStart(2, "0")}`;
         map[key] = (map[key] ?? 0) + 1;
       });
       return map;
@@ -880,7 +894,8 @@
       const map = {};
       orders.forEach(o => {
         if (!o.createdAt) return;
-        const key = o.createdAt.slice(0, 7); // YYYY-MM
+        const { year, month } = _phDateParts(o.createdAt);
+        const key = `${year}-${month}`; // YYYY-MM in PH time
         map[key] = (map[key] ?? 0) + 1;
       });
       return map;

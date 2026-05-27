@@ -392,23 +392,32 @@ function renderWaterQuantityChart(waterOrders) {
 }
 
 // 9. Orders over time — line chart using createdAt
+// All dates are bucketed in Philippine Time (UTC+8) so an order placed at
+// e.g. 10:30 AM PHT is never rolled back to the previous UTC date.
+const _PH_DATE_FMT = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Manila",
+  year: "numeric", month: "2-digit", day: "2-digit",
+});
+const phDateKey = (isoStr) => {
+  if (!isoStr) return "unknown";
+  try { return _PH_DATE_FMT.format(new Date(isoStr)); } // returns YYYY-MM-DD
+  catch { return "unknown"; }
+};
+
 function renderTimelineChart(allLaundry, waterOrders) {
   destroyChart("timeline");
   const ctx = el("chart-timeline");
   if (!ctx) return;
 
-  // Group by date string (YYYY-MM-DD)
-  const dateKey = (iso) => iso ? iso.slice(0, 10) : "unknown";
-
   const laundryByDate = {};
   allLaundry.forEach((o) => {
-    const d = dateKey(o.createdAt);
+    const d = phDateKey(o.createdAt);
     laundryByDate[d] = (laundryByDate[d] ?? 0) + 1;
   });
 
   const waterByDate = {};
   waterOrders.forEach((o) => {
-    const d = dateKey(o.createdAt);
+    const d = phDateKey(o.createdAt);
     waterByDate[d] = (waterByDate[d] ?? 0) + 1;
   });
 
